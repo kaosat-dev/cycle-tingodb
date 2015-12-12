@@ -74,6 +74,32 @@ describe("tingoDB-driver", function() {
       })
   })
 
+  it('can update documents', function( done ){
+    this.timeout(6000)
+    const tingoDBDriver = makeTingoDbDriver( dbPath )
+
+    const collectionName = "testCollection"
+    const inData = [{data:{name:"joe"},collectionName}]
+  
+    const out$ = Rx.Observable.from(inData)
+    const db = tingoDBDriver(out$)
+
+    const expData = [{name:"malek",age:28, _id: {id:2} }]
+
+    db.update("testCollection",{name:"joe"},{name:"malek",age:28})
+      .flatMap(e=>{
+        return db.find("testCollection",{},{toArray:true})
+      })
+      .forEach(obsData=>{
+
+        try {// FIXME: have to use try catch , very annoying, see link on top 
+          assert.deepEqual(obsData,expData) 
+        } catch(e){ return done(e)}
+
+        done()
+      })
+  })
+
   it('can delete documents', function( done ){
     this.timeout(6000)
     const tingoDBDriver = makeTingoDbDriver( dbPath )

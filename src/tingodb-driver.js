@@ -30,10 +30,7 @@ export default function makeTingoDbDriver(dbPath){
       })
     }
 
-    function update({collectionName, query, data, options}){
-
-    }
-
+  
     function findOne(collectionName, selectors){
       let obs = new Rx.Subject()
       let collection = _cachedCollections[collectionName]
@@ -103,6 +100,35 @@ export default function makeTingoDbDriver(dbPath){
       return obs
     }
 
+    function update(collectionName, ...args){
+      let argc = args.length
+      let options = {}
+      let selectors = []
+
+  
+      options = undefined//args[argc-1]   //last arg is options
+      selectors = args.slice(0,argc)//all the rest is what we want to use to find data : selectors, mappers etc
+      
+
+      let collection = collection = db.collection(collectionName) //_cachedCollections[collectionName]
+      let obs = new Rx.Subject()
+
+      if(!collection){
+        obs.onError(`collection ${collectionName} not found`)
+      }
+
+      console.log("update",selectors)
+      collection.update(...selectors, function(err, item){
+        if(err){
+          obs.onError(err)
+        }else{
+          obs.onNext(undefined)
+        }
+      })
+
+      return obs
+    }
+
     function remove(collectionName, ...args){
       let argc = args.length
       let options = {}
@@ -136,15 +162,19 @@ export default function makeTingoDbDriver(dbPath){
       })
 
       return obs
-
     }
 
+
+
+
+    //handle ouputs
     output$
       .forEach(insert)
 
     return {
       findOne
       ,find
+      ,update
       ,remove
     }
   }
