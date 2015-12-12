@@ -13,57 +13,61 @@ A [tingoDB](http://www.tingodb.com/) driver for cycle.js
 ##Using:
 
 
-  ###Setup:
+#### Setup:
 
-          let drivers = {
-            db      : makeTingoDbDriver("path/to/my/database")
-          }
+```js
+let drivers = {
+  db      : makeTingoDbDriver("path/to/my/database")
+}
 
-          Cycle.run(main, drivers)
+Cycle.run(main, drivers)
+```
 
-  ###In action:
+#### In action:
 
-          function db(){
-            const inData = {
-              data: {foo:42,bar:"someText"}
-              ,collectionName:"testCollection"
-            }
+```js
+  function db(){
+    const inData = {
+      data: {foo:42,bar:"someText"}
+      ,collectionName:"testCollection"
+    }
 
-            const out$ = of(inData)
-            return out$
-          }
+    const out$ = of(inData)
+    return out$
+  }
 
-          function main(drivers) {  
+  function main(drivers) {  
 
-            //get data from database
+    //get data from database
 
-            db.find("testCollection",{foo:42},{toArray:true})
-              .forEach(data=>{
-                console.log("find results",data)
-              })
+    db.find("testCollection",{foo:42},{toArray:true})
+      .forEach(data=>{
+        console.log("find results",data)
+      })
 
-            //output to database
-            const db$       = db()
-           
-            return {
-              db: db$
-            }
-          }
+    //output to database
+    const db$       = db()
+   
+    return {
+      db: db$
+    }
+  }
+```
 
+Or without the cycle.js boilerplate
 
-  Or without the cycle.js boilerplate
+```js
+const dbPath = "path/to/my/database"
+const tingoDBDriver = makeTingoDbDriver( dbPath )
 
-          const dbPath = "path/to/my/database"
-          const tingoDBDriver = makeTingoDbDriver( dbPath )
+const inData = {
+  data: {foo:42,bar:"someText"}
+  ,collectionName:"testCollection"
+}
 
-          const inData = {
-            data: {foo:42,bar:"someText"}
-            ,collectionName:"testCollection"
-          }
-
-          const out$ = of(inData)
-          const db = tingoDBDriver(out$)
-
+const out$ = of(inData)
+const db = tingoDBDriver(out$)
+```
 
 
 ## LICENSE
