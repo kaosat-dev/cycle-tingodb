@@ -105,19 +105,19 @@ describe("tingoDB-driver", function() {
     const tingoDBDriver = makeTingoDbDriver( dbPath )
 
     const collectionName = "testCollection"
-    const inData = [{data:{name:"joe"},collectionName},{data:{name:"malek"},collectionName}]
+    const inData = [{data:{name:"joe",foo:0},collectionName},{data:{name:"malek",foo:2},collectionName}]
   
     const out$ = Rx.Observable.from(inData)
     const db = tingoDBDriver(out$)
 
-    const expData = [{name:"malek"}]
+    const expData = [{name:"malek",foo:2,_id:{id:3}}]
 
     db.remove("testCollection",{name:"joe"})
       .flatMap(e=>{
         return db.find("testCollection",{},{toArray:true})
       })
       .forEach(obsData=>{
-        console.log("obsData",obsData, obsData.length)
+        //console.log("obsData",obsData, obsData.length)
 
         try {// FIXME: have to use try catch , very annoying, see link on top 
           assert.deepEqual(obsData,expData) 

@@ -18,7 +18,7 @@ export default function makeTingoDbDriver(dbPath){
     //output$ = new Rx.Subject() //output TO DB 
 
     function insert({collectionName, data}){
-      console.log("insert",data)
+      //console.log("insert",data)
 
       let collection = _cachedCollections[collectionName]
       if(!collection){
@@ -61,7 +61,7 @@ export default function makeTingoDbDriver(dbPath){
       if (argc === 1 ) //only one argument
       {
         options   = undefined
-        selectors = args[argc-1] //last arg is options
+        selectors = [args[argc-1]] //last arg is options
       }else if(argc > 1){
         options = args[argc-1] //last arg is options
         selectors = args.slice(0,argc-1)//all the rest is what we want to use to find data : selectors, mappers etc
@@ -117,7 +117,6 @@ export default function makeTingoDbDriver(dbPath){
         obs.onError(`collection ${collectionName} not found`)
       }
 
-      console.log("update",selectors)
       collection.update(...selectors, function(err, item){
         if(err){
           obs.onError(err)
@@ -137,8 +136,8 @@ export default function makeTingoDbDriver(dbPath){
       if (argc === 1 ) //only one argument
       {
         options   = undefined
-        selectors = args[argc-1] //last arg is options
-        console.log("options",options,selectors)
+        selectors = [args[argc-1]] //last arg is options
+        //console.log("options",options,selectors)
 
       }else if(argc > 1){
         options = args[argc-1] //last arg is options
@@ -152,12 +151,11 @@ export default function makeTingoDbDriver(dbPath){
         obs.onError(`collection ${collectionName} not found`)
       }
 
-      console.log("remove",selectors)
-      collection.remove(...selectors, function(err, item){
+      collection.remove(...selectors, function(err, result){
         if(err){
           obs.onError(err)
         }else{
-          obs.onNext(undefined)
+          obs.onNext(result)
         }
       })
 
