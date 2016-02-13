@@ -1,6 +1,8 @@
 import fs from 'fs'
 import Rx from 'rx'
 
+const {merge, of} = Rx.Observable
+
 /////////////
 let Datastore = require('tingodb')().Db
 
@@ -11,13 +13,12 @@ export default function makeTingoDbDriver(dbPath){
     fs.mkdirSync(dbPath)
   }
 
-  return function tingoDbDriver(output$)
+  function createResponse(query$)
   {
     let _cachedCollections = {}
 
-    //output$ = new Rx.Subject() //output TO DB 
-
     function insert({collectionName, data}){
+      let obs = new Rx.Subject()
       //console.log("insert",data)
 
       let collection = _cachedCollections[collectionName]
@@ -26,8 +27,10 @@ export default function makeTingoDbDriver(dbPath){
         _cachedCollections[collectionName] = collection
       }
       collection.insert(data , function(err, result) {
-        //console.log("insert",data, err,result)
+        //console.log("insert",data, err, result)
+        obs.onNext(result)
       })
+      return obs
     }
 
   
@@ -54,6 +57,7 @@ export default function makeTingoDbDriver(dbPath){
 
     //selectors,  options
     function find(collectionName, ...args){
+      //console.log("finding",collectionName, args)
       let argc = args.length
       let options = {}
       let selectors = []
@@ -101,12 +105,10 @@ export default function makeTingoDbDriver(dbPath){
     }
 
     function update(collectionName, ...args){
+      console.log("updating", collectionName,args)
       let argc = args.length
-      let options = {}
       let selectors = []
-
-  
-      options = undefined//args[argc-1]   //last arg is options
+    
       selectors = args.slice(0,argc)//all the rest is what we want to use to find data : selectors, mappers etc
       
 
@@ -129,51 +131,92 @@ export default function makeTingoDbDriver(dbPath){
     }
 
     function remove(collectionName, ...args){
+      console.log("remove",collectionName, args)
       let argc = args.length
       let options = {}
       let selectors = []
 
       if (argc === 1 ) //only one argument
       {
+        console.log("argc")
         options   = undefined
         selectors = [args[argc-1]] //last arg is options
-        //console.log("options",options,selectors)
-
       }else if(argc > 1){
         options = args[argc-1] //last arg is options
         selectors = args.slice(0,argc-1)//all the rest is what we want to use to find data : selectors, mappers etc
       }
+      console.log("options",options,selectors)
 
       let collection = collection = db.collection(collectionName) //_cachedCollections[collectionName]
       let obs = new Rx.Subject()
 
       if(!collection){
         obs.onError(`collection ${collectionName} not found`)
+      }else{
+        collection.remove(...selectors, function(err, result){
+          if(err){
+            obs.onError(err)
+          }else{
+            obs.onNext(result)
+          }
+        })
       }
-
-      collection.remove(...selectors, function(err, result){
-        if(err){
-          obs.onError(err)
-        }else{
-          obs.onNext(result)
-        }
-      })
 
       return obs
     }
 
-
-
+    query$ = query$.share()
+      //.tap(e=>console.log("query",e))
 
     //handle ouputs
-    output$
-      .forEach(insert)
+    const inserts$ = query$
+      .filter(o=>o.method.toLowerCase() === 'insert')
+      .flatMap(insert)
 
-    return {
-      findOne
-      ,find
-      ,update
-      ,remove
-    }
+    const reads$ = query$
+      .filter(o=>o.method.toLowerCase() === 'find')
+      .flatMap(o=>find(o.collectionName,...o.params))
+
+    const updates$ = query$
+      .filter(o=>o.method.toLowerCase() === 'update')
+      .flatMap(o=>update(o.collectionName,...o.params))
+
+    const removes$ = query$
+      .filter(o=>o.method.toLowerCase() === 'delete')
+      .flatMap(o=>remove(o.collectionName,...o.params))
+
+    //some need to fire in any case ? ie , insert, update, delete should take place
+    //even when not observed
+
+    const results$ =  merge(inserts$, reads$, updates$, removes$)
+
+    return results$
+
+  }
+
+  return function tingoDBDriver(query$, eager=true){
+    let response$$ = query$
+      .map(query => {
+        let response$ = createResponse( of(query) )
+        if (eager || query.eager) {
+          response$ = response$.replay(null, 1)
+          response$.connect()
+        }
+
+        //some need to fire in any case ? ie , insert, update, delete should take place
+        //even when not observed
+        //NVM : eager does the same ! 
+        if(['insert','update','delete'].indexOf(query.method.toLowerCase())>-1 ){
+          //response$.forEach(e=>e)
+        }
+
+        response$.query = query
+       
+        return response$
+      })
+      .replay(null, 1)
+
+    response$$.connect()
+    return response$$
   }
 }
