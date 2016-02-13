@@ -32,7 +32,7 @@ describe("tingoDB-driver", function() {
       }
     }
     const collectionName = "testCollection"
-    const out$ = of({collectionName, data})
+    const out$ = of({method:'insert', collectionName, data})
 
     tingoDBDriver(out$)
     
@@ -41,7 +41,7 @@ describe("tingoDB-driver", function() {
     done()
   })
 
-  it('has a find function to search for data, optionally converting output to array', function( done ){
+  it('enables you to search for data, optionally converting output to array', function( done ){
     this.timeout(6000)
     const tingoDBDriver = makeTingoDbDriver( dbPath )
 
@@ -52,81 +52,103 @@ describe("tingoDB-driver", function() {
         sub:true
       }
     }
-    const collectionName = "testCollection"
-    const out$ = of({collectionName, data:inData})
-    const db = tingoDBDriver(out$)
-
     const expData = { 
       fieldOne: 'some text',
       fieldTwo: 27.87,
       fieldThree: { sub: true },
-      _id: {id:2} }
+      _id: {"id": 2} }
 
-    db.find("testCollection",{},{toArray:true})
-      .filter(data=>data.length === 1)
-      .map(data=>data[0]) 
-      .forEach(obsData=>{
-      
+    const collectionName = "testCollection"
+    const queries$       = new Rx.Subject()
+    const db = tingoDBDriver(queries$)
+
+    /*db.forEach(function(e){
+      console.log("driver output",e)
+      e.forEach(f=>console.log("bla",f))
+    })*/
+
+    /*db
+      .filter(res$ => res$.query.method === 'insert')
+      .mergeAll()
+      .forEach(e=>console.log("insert",e))*/
+
+    db
+      .filter(res$ => res$.query.method === 'find')
+      .mergeAll()
+      .filter(data=>data.length>0)
+      .map(data=>data[0])
+      .forEach(function(obsData){
         try {// FIXME: have to use try catch , very annoying, see link on top 
+          //console.log("obsData",obsData,"expData",expData)
           assert.deepEqual(obsData,expData) 
         } catch(e){ return done(e)}
         done()
       })
+
+    queries$.onNext({method:'insert', collectionName, data:inData, eager:true})
+    queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
   })
 
-  it('can update documents', function( done ){
+  /*it('can update documents', function( done ){
     this.timeout(6000)
     const tingoDBDriver = makeTingoDbDriver( dbPath )
 
     const collectionName = "testCollection"
-    const inData = [{data:{name:"joe"},collectionName}]
-  
-    const out$ = Rx.Observable.from(inData)
-    const db = tingoDBDriver(out$)
-
+    const inData = [{data:{name:"joe"}}]
     const expData = [{name:"malek",age:28, _id: {id:2} }]
+  
+    const queries$       = new Rx.Subject()
+    const db = tingoDBDriver(queries$)
 
-    db.update("testCollection",{name:"joe"},{name:"malek",age:28})
-      .flatMap(e=>{
-        return db.find("testCollection",{},{toArray:true})
-      })
-      .forEach(obsData=>{
-
+    db
+      .filter(res$ => res$.query.method === 'find')
+      .mergeAll()
+      .filter(data=>data.length>0)
+      .map(data=>data[0])
+      .forEach(function(obsData){
         try {// FIXME: have to use try catch , very annoying, see link on top 
+          console.log("obsData",obsData,"expData",expData)
           assert.deepEqual(obsData,expData) 
         } catch(e){ return done(e)}
-
         done()
       })
-  })
+
+    queries$.onNext({method:'insert', collectionName, data:inData})
+    queries$.onNext({method:'update', collectionName, params:[{name:"joe"},{name:"malek",age:28}]})
+    queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
+
+  })*/
 
   it('can delete documents', function( done ){
     this.timeout(6000)
     const tingoDBDriver = makeTingoDbDriver( dbPath )
 
     const collectionName = "testCollection"
-    const inData = [{data:{name:"joe",foo:0},collectionName},{data:{name:"malek",foo:2},collectionName}]
-  
-    const out$ = Rx.Observable.from(inData)
-    const db = tingoDBDriver(out$)
+    const inData         = [{data:{name:"joe",foo:0},collectionName},{data:{name:"malek",foo:2},collectionName}]
+    const expData        = [{name:"malek",foo:2,_id:{id:3}}]
 
-    const expData = [{name:"malek",foo:2,_id:{id:3}}]
+    const queries$       = new Rx.Subject()
+    const db             = tingoDBDriver(queries$)
 
-    db.remove("testCollection",{name:"joe"})
-      .flatMap(e=>{
-        return db.find("testCollection",{},{toArray:true})
-      })
-      .forEach(obsData=>{
-        //console.log("obsData",obsData, obsData.length)
 
+    db
+      .filter(res$ => res$.query.method === 'find')
+      .mergeAll()
+      //.map(data=>data[0])
+      .forEach(function(obsData){
         try {// FIXME: have to use try catch , very annoying, see link on top 
+          console.log("obsData",obsData,"expData",expData)
           assert.deepEqual(obsData,expData) 
         } catch(e){ return done(e)}
-
         done()
       })
+
+    queries$.onNext({method:'insert', collectionName, data:inData})
+    queries$.onNext({method:'delete', collectionName, params:[{name:"joe"}]})
+    queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
+
   })
 
-
+  
 })
 
