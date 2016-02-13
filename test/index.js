@@ -89,12 +89,12 @@ describe("tingoDB-driver", function() {
     queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
   })
 
-  /*it('can update documents', function( done ){
+  it('can update documents', function( done ){
     this.timeout(6000)
     const tingoDBDriver = makeTingoDbDriver( dbPath )
 
     const collectionName = "testCollection"
-    const inData = [{data:{name:"joe"}}]
+    const inData  = [{name:"joe"}]
     const expData = [{name:"malek",age:28, _id: {id:2} }]
   
     const queries$       = new Rx.Subject()
@@ -103,8 +103,6 @@ describe("tingoDB-driver", function() {
     db
       .filter(res$ => res$.query.method === 'find')
       .mergeAll()
-      .filter(data=>data.length>0)
-      .map(data=>data[0])
       .forEach(function(obsData){
         try {// FIXME: have to use try catch , very annoying, see link on top 
           console.log("obsData",obsData,"expData",expData)
@@ -117,34 +115,31 @@ describe("tingoDB-driver", function() {
     queries$.onNext({method:'update', collectionName, params:[{name:"joe"},{name:"malek",age:28}]})
     queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
 
-  })*/
+  })
 
   it('can delete documents', function( done ){
     this.timeout(6000)
     const tingoDBDriver = makeTingoDbDriver( dbPath )
 
     const collectionName = "testCollection"
-    const inData         = [{data:{name:"joe",foo:0},collectionName},{data:{name:"malek",foo:2},collectionName}]
+    const inData         = [{name:"joe",foo:0},{name:"malek",foo:2}]
     const expData        = [{name:"malek",foo:2,_id:{id:3}}]
 
     const queries$       = new Rx.Subject()
     const db             = tingoDBDriver(queries$)
 
-
     db
       .filter(res$ => res$.query.method === 'find')
       .mergeAll()
-      //.map(data=>data[0])
       .forEach(function(obsData){
         try {// FIXME: have to use try catch , very annoying, see link on top 
-          console.log("obsData",obsData,"expData",expData)
           assert.deepEqual(obsData,expData) 
         } catch(e){ return done(e)}
         done()
       })
 
     queries$.onNext({method:'insert', collectionName, data:inData})
-    queries$.onNext({method:'delete', collectionName, params:[{name:"joe"}]})
+    queries$.onNext({method:'delete', collectionName, params:{name:"joe"}})
     queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
 
   })

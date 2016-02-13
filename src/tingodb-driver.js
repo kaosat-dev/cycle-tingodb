@@ -105,12 +105,12 @@ export default function makeTingoDbDriver(dbPath){
     }
 
     function update(collectionName, ...args){
-      console.log("updating", collectionName,args)
+      console.log("updating", collectionName, args)
       let argc = args.length
-      let selectors = []
     
-      selectors = args.slice(0,argc)//all the rest is what we want to use to find data : selectors, mappers etc
+      const selectors = args[0]//args.slice(0,argc)//all the rest is what we want to use to find data : selectors, mappers etc
       
+      console.log("selectors", selectors)
 
       let collection = collection = db.collection(collectionName) //_cachedCollections[collectionName]
       let obs = new Rx.Subject()
@@ -131,21 +131,19 @@ export default function makeTingoDbDriver(dbPath){
     }
 
     function remove(collectionName, ...args){
-      console.log("remove",collectionName, args)
+      //console.log("remove",collectionName, args)
       let argc = args.length
       let options = {}
       let selectors = []
 
       if (argc === 1 ) //only one argument
       {
-        console.log("argc")
         options   = undefined
         selectors = [args[argc-1]] //last arg is options
       }else if(argc > 1){
         options = args[argc-1] //last arg is options
         selectors = args.slice(0,argc-1)//all the rest is what we want to use to find data : selectors, mappers etc
       }
-      console.log("options",options,selectors)
 
       let collection = collection = db.collection(collectionName) //_cachedCollections[collectionName]
       let obs = new Rx.Subject()
@@ -179,11 +177,11 @@ export default function makeTingoDbDriver(dbPath){
 
     const updates$ = query$
       .filter(o=>o.method.toLowerCase() === 'update')
-      .flatMap(o=>update(o.collectionName,...o.params))
+      .flatMap(o=>update(o.collectionName, o.params))
 
     const removes$ = query$
       .filter(o=>o.method.toLowerCase() === 'delete')
-      .flatMap(o=>remove(o.collectionName,...o.params))
+      .flatMap(o=>remove(o.collectionName, o.params))
 
     //some need to fire in any case ? ie , insert, update, delete should take place
     //even when not observed
