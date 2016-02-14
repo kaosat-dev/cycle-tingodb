@@ -17,7 +17,7 @@ A [tingoDB](http://www.tingodb.com/) driver for cycle.js
 
 ```js
 let drivers = {
-  db      : makeTingoDbDriver("path/to/my/database")
+  db      : makeTingoDBDriver("path/to/my/database")
 }
 
 Cycle.run(main, drivers)

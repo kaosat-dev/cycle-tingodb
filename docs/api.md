@@ -23,19 +23,20 @@ instructions how tingoDB should execute the queries.
   updates etc, if there are no observables listening to those operations
 
 Depending on the method, you can have these optional parameters
-* insert: *
+
+**insert**
 - `data` *(Object)*: an object /array of data to insert into the database
 
-* find: *
+**find**
 - `query` *(Object)*: an object with mongo/tingoDB query parameters
 - `options` *(Object)*: an object for extra parameters usually you want to use {toArray:true} to
 convert outputs to useable arrays
 
-* update: *
+**update**
 - `query` *(Object)*: an object with mongo/tingoDB query parameters (what we want to change)
 - `update` *(Object)*: an object with mongo/tingoDB update parameters (what we want to change the results to)
 
-* delete: *
+**delete**
 - `query` *(Object)*: an object with mongo/tingoDB query parameters (what we want to delete)
 
 
