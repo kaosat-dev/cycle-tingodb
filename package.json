@@ -22,8 +22,6 @@
     "watchify": "^3.6.1"
   },
   "scripts": {
-    "browserify": "browserify src/tingodb-driver  -t babelify --o dist/cycle-tingodb.js",
-    "build": "npm run browserify",
     "compile-lib": "babel -d lib/ src/",
     "watch": "watchify src/tingodb-driver  -t babelify --o dist/cycle-tingodb.js -v -d",
     "mocha": "mocha test --compilers js:babel-core/register",

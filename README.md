@@ -48,7 +48,7 @@ Cycle.run(main, drivers)
     }
   }
 ```
-For a more advanced usage, check the [tests](https://github.com/kaosat-dev/cycle-tingodb/blob/master/test/index.js) and the [documentation](https://github.com/kaosat-dev/cycle-tingodb/blob/master/docs/api.md).
+For a more advanced usage, check the [tests](https://github.com/kaosat-dev/cycle-tingodb-driver/blob/master/test/index.js) and the [documentation](https://github.com/kaosat-dev/cycle-tingodb-driver/blob/master/docs/api.md).
 
 
 ## LICENSE
