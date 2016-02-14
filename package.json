@@ -1,6 +1,6 @@
 {
   "name": "cycle-tingodb-driver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tingoDB driver for cycle.js (server side)",
   "main": "lib/tingodb-driver.js",
   "author": "Mark 'kaosat-dev' Moissette",
