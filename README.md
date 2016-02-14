@@ -57,7 +57,7 @@ For a more advanced usage, check the [tests](https://github.com/kaosat-dev/cycle
 
 - - -
 
-[![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
+[![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
 [![Build Status](https://travis-ci.org/kaosat-dev/cycle-tingodb-driver.svg)](https://travis-ci.org/kaosat-dev/cycle-tingodb-driver)
 [![Dependency Status](https://david-dm.org/kaosat-dev/cycle-tingodb-driver.svg)](https://david-dm.org/kaosat-dev/cycle-tingodb-driver)
 [![devDependency Status](https://david-dm.org/kaosat-dev/cycle-tingodb-driver/dev-status.svg)](https://david-dm.org/kaosat-dev/cycle-tingodb-driver#info=devDependencies)
