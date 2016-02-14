@@ -44,11 +44,11 @@ Cycle.run(main, drivers)
       })
    
     return {
-      db: db$
+      db: dbQueries$
     }
   }
 ```
-For a more advanced usage, check the [tests](https://github.com/kaosat-dev/cycle-tingodb/blob/make-cyclic/test/index.js) and the [documentation](https://github.com/kaosat-dev/cycle-tingodb/blob/master/docs/api.md).
+For a more advanced usage, check the [tests](https://github.com/kaosat-dev/cycle-tingodb/blob/master/test/index.js) and the [documentation](https://github.com/kaosat-dev/cycle-tingodb/blob/master/docs/api.md).
 
 
 ## LICENSE
