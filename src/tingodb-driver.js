@@ -6,7 +6,7 @@ const {merge, of} = Rx.Observable
 /////////////
 let Datastore = require('tingodb')().Db
 
-export default function makeTingoDbDriver(dbPath){
+export default function makeTingoDBDriver(dbPath){
   let db = new Datastore(dbPath, {})
 
   if (!fs.existsSync(dbPath)){

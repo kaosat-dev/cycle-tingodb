@@ -6,7 +6,7 @@ const of = Rx.Observable.of
 const never = Rx.Observable.never
 import rmdirSync from './utils'
 
-import makeTingoDbDriver from '../src/tingodb-driver'
+import makeTingoDBDriver from '../src/tingodb-driver'
 
 //some very annoying issues with mocha , see here : https://www.bountysource.com/issues/1401310-mocha-times-out-when-tests-fail-reports-nothing
 
@@ -22,7 +22,7 @@ describe("tingoDB-driver", function() {
 
   it('should write input data to db ', (done) => {
     
-    const tingoDBDriver = makeTingoDbDriver( dbPath )
+    const tingoDBDriver = makeTingoDBDriver( dbPath )
 
     const data = {
       fieldOne: "some text"
@@ -43,7 +43,7 @@ describe("tingoDB-driver", function() {
 
   it('enables you to search for data, optionally converting output to array', function( done ){
     this.timeout(6000)
-    const tingoDBDriver = makeTingoDbDriver( dbPath )
+    const tingoDBDriver = makeTingoDBDriver( dbPath )
 
     const inData = {
       fieldOne: "some text"
@@ -61,16 +61,6 @@ describe("tingoDB-driver", function() {
     const collectionName = "testCollection"
     const queries$       = new Rx.Subject()
     const db = tingoDBDriver(queries$)
-
-    /*db.forEach(function(e){
-      console.log("driver output",e)
-      e.forEach(f=>console.log("bla",f))
-    })*/
-
-    /*db
-      .filter(res$ => res$.query.method === 'insert')
-      .mergeAll()
-      .forEach(e=>console.log("insert",e))*/
 
     db
       .filter(res$ => res$.query.method === 'find')
@@ -91,7 +81,7 @@ describe("tingoDB-driver", function() {
 
   it('can update documents', function( done ){
     this.timeout(6000)
-    const tingoDBDriver = makeTingoDbDriver( dbPath )
+    const tingoDBDriver = makeTingoDBDriver( dbPath )
 
     const collectionName = "testCollection"
     const inData  = [{name:"joe"}]
@@ -119,7 +109,7 @@ describe("tingoDB-driver", function() {
 
   it('can delete documents', function( done ){
     this.timeout(6000)
-    const tingoDBDriver = makeTingoDbDriver( dbPath )
+    const tingoDBDriver = makeTingoDBDriver( dbPath )
 
     const collectionName = "testCollection"
     const inData         = [{name:"joe",foo:0},{name:"malek",foo:2}]
