@@ -56,30 +56,16 @@ export default function makeTingoDbDriver(dbPath){
     }
 
     //selectors,  options
-    function find(collectionName, ...args){
-      //console.log("finding",collectionName, args)
-      let argc = args.length
-      let options = {}
-      let selectors = []
-
-      if (argc === 1 ) //only one argument
-      {
-        options   = undefined
-        selectors = [args[argc-1]] //last arg is options
-      }else if(argc > 1){
-        options = args[argc-1] //last arg is options
-        selectors = args.slice(0,argc-1)//all the rest is what we want to use to find data : selectors, mappers etc
-      }
-
-      //console.log("args",args,"len",argc, "options",options,"selectors",selectors)
-
+    function find({collectionName, query=undefined, projection=undefined, options={}}){
+      //console.log("finding",collectionName, query, projection, options)
+     
       let obs = new Rx.Subject()
       let collection = _cachedCollections[collectionName]
       if(!collection){
         collection = db.collection(collectionName)
         //obs.onError(`collection ${collectionName} not found`)
       }
-      collection.find(...selectors, function(err, item) {
+      collection.find(query, projection, function(err, item) {
         //console.log("finding stuff",err,item, options)
         if(item){
           if(options.toArray){
@@ -104,13 +90,8 @@ export default function makeTingoDbDriver(dbPath){
       return obs
     }
 
-    function update(collectionName, ...args){
-      console.log("updating", collectionName, args)
-      let argc = args.length
-    
-      const selectors = args[0]//args.slice(0,argc)//all the rest is what we want to use to find data : selectors, mappers etc
-      
-      console.log("selectors", selectors)
+    function update({collectionName, query=undefined, update=undefined, options=undefined}){
+      //console.log("updating", collectionName, query, update, options)
 
       let collection = collection = db.collection(collectionName) //_cachedCollections[collectionName]
       let obs = new Rx.Subject()
@@ -119,7 +100,7 @@ export default function makeTingoDbDriver(dbPath){
         obs.onError(`collection ${collectionName} not found`)
       }
 
-      collection.update(...selectors, function(err, item){
+      collection.update(query, update, options, function(err, item){
         if(err){
           obs.onError(err)
         }else{
@@ -130,20 +111,8 @@ export default function makeTingoDbDriver(dbPath){
       return obs
     }
 
-    function remove(collectionName, ...args){
-      //console.log("remove",collectionName, args)
-      let argc = args.length
-      let options = {}
-      let selectors = []
-
-      if (argc === 1 ) //only one argument
-      {
-        options   = undefined
-        selectors = [args[argc-1]] //last arg is options
-      }else if(argc > 1){
-        options = args[argc-1] //last arg is options
-        selectors = args.slice(0,argc-1)//all the rest is what we want to use to find data : selectors, mappers etc
-      }
+    function remove({collectionName, query=undefined, options=undefined }){
+      //console.log("remove", collectionName, query, options)
 
       let collection = collection = db.collection(collectionName) //_cachedCollections[collectionName]
       let obs = new Rx.Subject()
@@ -151,7 +120,7 @@ export default function makeTingoDbDriver(dbPath){
       if(!collection){
         obs.onError(`collection ${collectionName} not found`)
       }else{
-        collection.remove(...selectors, function(err, result){
+        collection.remove(query, options, function(err, result){
           if(err){
             obs.onError(err)
           }else{
@@ -173,15 +142,15 @@ export default function makeTingoDbDriver(dbPath){
 
     const reads$ = query$
       .filter(o=>o.method.toLowerCase() === 'find')
-      .flatMap(o=>find(o.collectionName,...o.params))
+      .flatMap(find)
 
     const updates$ = query$
       .filter(o=>o.method.toLowerCase() === 'update')
-      .flatMap(o=>update(o.collectionName, o.params))
+      .flatMap(update)
 
     const removes$ = query$
       .filter(o=>o.method.toLowerCase() === 'delete')
-      .flatMap(o=>remove(o.collectionName, o.params))
+      .flatMap(remove)
 
     //some need to fire in any case ? ie , insert, update, delete should take place
     //even when not observed
@@ -199,13 +168,6 @@ export default function makeTingoDbDriver(dbPath){
         if (eager || query.eager) {
           response$ = response$.replay(null, 1)
           response$.connect()
-        }
-
-        //some need to fire in any case ? ie , insert, update, delete should take place
-        //even when not observed
-        //NVM : eager does the same ! 
-        if(['insert','update','delete'].indexOf(query.method.toLowerCase())>-1 ){
-          //response$.forEach(e=>e)
         }
 
         response$.query = query

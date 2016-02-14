@@ -86,7 +86,7 @@ describe("tingoDB-driver", function() {
       })
 
     queries$.onNext({method:'insert', collectionName, data:inData, eager:true})
-    queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
+    queries$.onNext({method:'find'  , collectionName, query:{}, options:{toArray:true} })
   })
 
   it('can update documents', function( done ){
@@ -105,15 +105,15 @@ describe("tingoDB-driver", function() {
       .mergeAll()
       .forEach(function(obsData){
         try {// FIXME: have to use try catch , very annoying, see link on top 
-          console.log("obsData",obsData,"expData",expData)
+          //console.log("obsData",obsData,"expData",expData)
           assert.deepEqual(obsData,expData) 
         } catch(e){ return done(e)}
         done()
       })
 
     queries$.onNext({method:'insert', collectionName, data:inData})
-    queries$.onNext({method:'update', collectionName, params:[{name:"joe"},{name:"malek",age:28}]})
-    queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
+    queries$.onNext({method:'update', collectionName, query:{name:"joe"}, update:{name:"malek",age:28} })
+    queries$.onNext({method:'find'  , collectionName, query:{}, options:{toArray:true} })
 
   })
 
@@ -139,8 +139,8 @@ describe("tingoDB-driver", function() {
       })
 
     queries$.onNext({method:'insert', collectionName, data:inData})
-    queries$.onNext({method:'delete', collectionName, params:{name:"joe"}})
-    queries$.onNext({method:'find'  , collectionName, params:[{},{toArray:true}]})
+    queries$.onNext({method:'delete', collectionName, query:{name:"joe"} })
+    queries$.onNext({method:'find'  , collectionName, query:{}, options:{toArray:true} })
 
   })
 
