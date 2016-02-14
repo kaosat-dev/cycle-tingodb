@@ -7,8 +7,8 @@ A [tingoDB](http://www.tingodb.com/) driver for cycle.js
 
 ##Notes:
 
-- for server side use
-- work in progress , use at your own risk !
+- for **server side** use only !
+
 
 ##Using:
 
@@ -26,48 +26,29 @@ Cycle.run(main, drivers)
 #### In action:
 
 ```js
-  function db(){
-    const inData = {
-      data: {foo:42,bar:"someText"}
-      ,collectionName:"testCollection"
-    }
+  
+  function main(sources) {  
 
-    const out$ = of(inData)
-    return out$
-  }
-
-  function main(drivers) {  
-
-    //get data from database
-
-    db.find("testCollection",{foo:42},{toArray:true})
-      .forEach(data=>{
-        console.log("find results",data)
+    sources.db
+      .filter(res$ => res$.query.method === 'find' && id===72 )// we wanted to find something in the database, and the query had id 72
+      .mergeAll() // flattens the metastream
+      .forEach(function(result){
+        console.log("query result",result)// 
       })
+    
+    //Use this type of query to insert data {method:'insert', collectionName:"testCollection", data: {foo:42,bar:"someText"} }
 
-    //output to database
-    const db$       = db()
+    const dbQueries$  = Rx.Observable.interval(1000)
+      .map(() => {//get data from database
+        return {method:'find', id:72, collectionName:"testCollection", query:{foo:42}, options:{toArray:true} }
+      })
    
     return {
       db: db$
     }
   }
 ```
-
-Or without the cycle.js boilerplate
-
-```js
-const dbPath = "path/to/my/database"
-const tingoDBDriver = makeTingoDbDriver( dbPath )
-
-const inData = {
-  data: {foo:42,bar:"someText"}
-  ,collectionName:"testCollection"
-}
-
-const out$ = of(inData)
-const db = tingoDBDriver(out$)
-```
+For a more advanced usage, check the [tests](https://github.com/kaosat-dev/cycle-tingodb/blob/make-cyclic/test/index.js) and the [documentation](https://github.com/kaosat-dev/cycle-tingodb/blob/master/docs/api.md).
 
 
 ## LICENSE
